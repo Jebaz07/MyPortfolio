@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -10,7 +9,6 @@ import { toast } from "sonner";
 import { Loader2, Eye, EyeOff, LogIn } from "lucide-react";
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,8 +32,8 @@ export default function AdminLoginPage() {
         toast.error("Invalid email or password");
       } else {
         toast.success("Welcome back!");
-        router.push("/admin");
-        router.refresh();
+        // Hard redirect so server validates cookie and proxy lets us through
+        window.location.href = "/admin";
       }
     } catch {
       setError("Something went wrong");

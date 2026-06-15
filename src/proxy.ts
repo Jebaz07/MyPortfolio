@@ -2,16 +2,23 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
-  const isOnAdmin = request.nextUrl.pathname.startsWith("/admin");
-  const isOnLogin = request.nextUrl.pathname === "/admin/login";
+  const { pathname } = request.nextUrl;
 
-  if (isOnLogin || !isOnAdmin) return;
+  // Allow login page and static assets
+  if (pathname === "/admin/login" || pathname.startsWith("/_next/") || pathname.startsWith("/api/")) {
+    return;
+  }
 
-  const token = request.cookies.get("next-auth.session-token")?.value ||
-                request.cookies.get("__Secure-next-auth.session-token")?.value;
+  // Check for session token (Auth.js v5 uses authjs. prefix)
+  const sessionToken =
+    request.cookies.get("authjs.session-token")?.value ||
+    request.cookies.get("__Secure-authjs.session-token")?.value ||
+    request.cookies.get("next-auth.session-token")?.value ||
+    request.cookies.get("__Secure-next-auth.session-token")?.value;
 
-  if (!token) {
+  if (!sessionToken) {
     const loginUrl = new URL("/admin/login", request.nextUrl.origin);
+    loginUrl.searchParams.set("callbackUrl", request.nextUrl.href);
     return NextResponse.redirect(loginUrl);
   }
 }
