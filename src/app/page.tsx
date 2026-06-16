@@ -11,11 +11,16 @@ import { Card, CardContent } from "@/components/ui/card";
 interface Project {
   id: string;
   title: string;
-  slug: string;
   description: string;
   technologies: string[];
   featured: boolean;
+  githubUrl?: string | null;
   images: { url: string; alt?: string }[];
+}
+
+function openGitHub(url: string | null | undefined) {
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 interface SkillCategory {
@@ -161,45 +166,51 @@ export default function HomePage() {
 
           {projects.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-              {projects.slice(0, 6).map((project, i) => (
-                <Reveal key={project.id} delay={i * 0.08}>
-                  <Link href={`/projects/${project.slug}`}>
-                    <Card className="group overflow-hidden border-white/5 hover:border-gold/30 transition-all duration-500 h-full bg-white/[0.02]">
-                      <div className="relative h-48 sm:h-52 overflow-hidden bg-zinc-900">
-                        {project.images?.[0]?.url ? (
-                          <img
-                            src={project.images[0].url}
-                            alt={project.images[0].alt || project.title}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <Code size={36} className="text-zinc-700" />
-                          </div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      </div>
-                      <CardContent className="p-5 sm:p-6">
-                        <h3 className="text-lg font-semibold mb-2 group-hover:text-gold transition-colors">
-                          {project.title}
-                        </h3>
-                        <p className="text-zinc-400 text-sm line-clamp-2 mb-4">
-                          {project.description}
-                        </p>
-                        {Array.isArray(project.technologies) && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {project.technologies.slice(0, 4).map((tech: string) => (
-                              <span key={tech} className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 text-zinc-400 border border-white/10">
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </Reveal>
-              ))}
+              {projects.slice(0, 6).map((project, i) => {
+                const hasUrl = !!project.githubUrl;
+                return (
+                  <Reveal key={project.id} delay={i * 0.08}>
+                    <div
+                      onClick={() => hasUrl && openGitHub(project.githubUrl)}
+                      className={`${hasUrl ? "cursor-pointer" : "cursor-default"} group`}
+                    >
+                      <Card className="overflow-hidden border-white/5 hover:border-gold/30 transition-all duration-500 h-full bg-white/[0.02]">
+                        <div className="relative h-48 sm:h-52 overflow-hidden bg-zinc-900">
+                          {project.images?.[0]?.url ? (
+                            <img
+                              src={project.images[0].url}
+                              alt={project.images[0].alt || project.title}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <Code size={36} className="text-zinc-700" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        </div>
+                        <CardContent className="p-5 sm:p-6">
+                          <h3 className="text-lg font-semibold mb-2 group-hover:text-gold transition-colors">
+                            {project.title}
+                          </h3>
+                          <p className="text-zinc-400 text-sm line-clamp-2 mb-4">
+                            {project.description}
+                          </p>
+                          {Array.isArray(project.technologies) && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {project.technologies.slice(0, 4).map((tech: string) => (
+                                <span key={tech} className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 text-zinc-400 border border-white/10">
+                                  {tech}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </Reveal>
+                );
+              })}
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

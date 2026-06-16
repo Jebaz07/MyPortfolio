@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import { Search, Code, ArrowUpRight } from "lucide-react";
+import { Search, Code, ArrowUpRight, FolderGit2 } from "lucide-react";
 import Reveal from "@/components/sections/reveal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,12 +10,17 @@ import { Input } from "@/components/ui/input";
 
 interface Project {
   id: string;
-  slug: string;
   title: string;
   description: string;
   featured: boolean;
   technologies: string[];
+  githubUrl?: string | null;
   images?: { url: string; alt?: string }[];
+}
+
+function openGitHub(url: string | null | undefined) {
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
 }
 
 export default function ProjectsPage() {
@@ -95,38 +99,54 @@ export default function ProjectsPage() {
               Featured
             </h2>
             <div className="grid md:grid-cols-2 gap-5 sm:gap-6 mb-16 sm:mb-20">
-              {featured.map((project, i) => (
-                <motion.div key={project.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
-                  <Link href={`/projects/${project.slug}`}>
-                    <Card className="group overflow-hidden border-gold/10 hover:border-gold/30 transition-all duration-500 h-full bg-white/[0.02]">
-                      <div className="relative h-56 sm:h-64 overflow-hidden bg-zinc-900">
-                        {project.images?.[0]?.url ? (
-                          <img src={project.images[0].url} alt={project.images[0].alt || project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center"><Code size={48} className="text-zinc-700" /></div>
-                        )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
-                          <span className="flex items-center gap-2 text-gold text-sm font-medium">View Project <ArrowUpRight size={14} /></span>
-                        </div>
-                      </div>
-                      <CardContent className="p-5 sm:p-6">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-lg sm:text-xl font-semibold group-hover:text-gold transition-colors">{project.title}</h3>
-                          <span className="text-[10px] uppercase tracking-widest text-gold border border-gold/20 rounded-full px-2 py-0.5">Featured</span>
-                        </div>
-                        <p className="text-zinc-400 text-sm line-clamp-2 mb-4">{project.description}</p>
-                        {Array.isArray(project.technologies) && (
-                          <div className="flex flex-wrap gap-1.5">
-                            {project.technologies.map((tech: string) => (
-                              <span key={tech} className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-zinc-400 border border-white/10">{tech}</span>
-                            ))}
+              {featured.map((project, i) => {
+                const hasUrl = !!project.githubUrl;
+                return (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    <div
+                      onClick={() => hasUrl && openGitHub(project.githubUrl)}
+                      className={`${hasUrl ? "cursor-pointer" : "cursor-default"} group`}
+                    >
+                      <Card className="overflow-hidden border-gold/10 hover:border-gold/30 transition-all duration-500 h-full bg-white/[0.02]">
+                        <div className="relative h-56 sm:h-64 overflow-hidden bg-zinc-900">
+                          {project.images?.[0]?.url ? (
+                            <img src={project.images[0].url} alt={project.images[0].alt || project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center"><Code size={48} className="text-zinc-700" /></div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
+                            {hasUrl ? (
+                              <span className="flex items-center gap-2 text-gold text-sm font-medium"><FolderGit2 size={14} /> View on GitHub <ArrowUpRight size={14} /></span>
+                            ) : (
+                              <span className="flex items-center gap-2 text-zinc-400 text-sm font-medium">GitHub link coming soon</span>
+                            )}
                           </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  </Link>
-                </motion.div>
-              ))}
+                        </div>
+                        <CardContent className="p-5 sm:p-6">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="text-lg sm:text-xl font-semibold group-hover:text-gold transition-colors">{project.title}</h3>
+                            <span className="text-[10px] uppercase tracking-widest text-gold border border-gold/20 rounded-full px-2 py-0.5">Featured</span>
+                          </div>
+                          <p className="text-zinc-400 text-sm line-clamp-2 mb-4">{project.description}</p>
+                          {Array.isArray(project.technologies) && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {project.technologies.map((tech: string) => (
+                                <span key={tech} className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-zinc-400 border border-white/10">{tech}</span>
+                              ))}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </Reveal>
         )}
@@ -142,35 +162,48 @@ export default function ProjectsPage() {
 
         {filtered.length > 0 ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {filtered.map((project, i) => (
-              <Reveal key={project.id} delay={i * 0.05}>
-                <Link href={`/projects/${project.slug}`}>
-                  <Card className="group overflow-hidden border-white/5 hover:border-gold/30 transition-all duration-500 h-full bg-white/[0.02]">
-                    <div className="relative h-44 sm:h-48 overflow-hidden bg-zinc-900">
+            {filtered.map((project, i) => {
+              const hasUrl = !!project.githubUrl;
+              return (
+                <Reveal key={project.id} delay={i * 0.05}>
+                  <div
+                    onClick={() => hasUrl && openGitHub(project.githubUrl)}
+                    className={`${hasUrl ? "cursor-pointer" : "cursor-default"} group`}
+                  >
+                    <Card className="overflow-hidden border-white/5 hover:border-gold/30 transition-all duration-500 h-full bg-white/[0.02]">
+                      <div className="relative h-44 sm:h-48 overflow-hidden bg-zinc-900">
                         {project.images?.[0]?.url ? (
                           <img src={project.images[0].url} alt={project.images[0].alt || project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center"><Code size={48} className="text-zinc-700" /></div>
                         )}
-                    </div>
-                    <CardContent className="p-5">
-                      <h3 className="text-base font-semibold mb-1.5 group-hover:text-gold transition-colors">{project.title}</h3>
-                      <p className="text-zinc-400 text-sm line-clamp-2 mb-3">{project.description}</p>
-                      {Array.isArray(project.technologies) && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {project.technologies.slice(0, 3).map((tech: string) => (
-                            <span key={tech} className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 text-zinc-500 border border-white/10">{tech}</span>
-                          ))}
-                          {project.technologies.length > 3 && (
-                            <span className="text-[11px] px-2 py-0.5 text-zinc-600">+{project.technologies.length - 3}</span>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6">
+                          {hasUrl ? (
+                            <span className="flex items-center gap-2 text-gold text-sm font-medium"><FolderGit2 size={14} /> View on GitHub <ArrowUpRight size={14} /></span>
+                          ) : (
+                            <span className="flex items-center gap-2 text-zinc-400 text-sm font-medium">GitHub link coming soon</span>
                           )}
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </Link>
-              </Reveal>
-            ))}
+                      </div>
+                      <CardContent className="p-5">
+                        <h3 className="text-base font-semibold mb-1.5 group-hover:text-gold transition-colors">{project.title}</h3>
+                        <p className="text-zinc-400 text-sm line-clamp-2 mb-3">{project.description}</p>
+                        {Array.isArray(project.technologies) && (
+                          <div className="flex flex-wrap gap-1.5">
+                            {project.technologies.slice(0, 3).map((tech: string) => (
+                              <span key={tech} className="text-[11px] px-2 py-0.5 rounded-full bg-white/5 text-zinc-500 border border-white/10">{tech}</span>
+                            ))}
+                            {project.technologies.length > 3 && (
+                              <span className="text-[11px] px-2 py-0.5 text-zinc-600">+{project.technologies.length - 3}</span>
+                            )}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </Reveal>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-20">
