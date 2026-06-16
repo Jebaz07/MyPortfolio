@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Calendar, MapPin, GraduationCap, Target, Mail } from "lucide-react";
 import Reveal from "@/components/sections/reveal";
 import { Card } from "@/components/ui/card";
+import { toLocalDate } from "@/lib/date-utils";
 
 interface ExperienceItem {
   id: string;
@@ -27,12 +28,10 @@ interface SettingsData {
   email?: string;
 }
 
-function formatDate(dateVal: string | Date): string {
-  try {
-    return new Date(dateVal).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-  } catch {
-    return String(dateVal || "").slice(0, 7);
-  }
+function formatDate(dateVal: string): string {
+  const d = toLocalDate(dateVal);
+  if (!d) return "";
+  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
 export default function AboutPage() {

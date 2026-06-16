@@ -5,6 +5,7 @@ import { Award, FileText, ExternalLink, Calendar, Verified } from "lucide-react"
 import Reveal from "@/components/sections/reveal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { toLocalDate } from "@/lib/date-utils";
 
 interface Certification {
   id: string;
@@ -18,12 +19,10 @@ interface Certification {
   expiryDate?: string;
 }
 
-function formatDate(dateVal: string | Date): string {
-  try {
-    return new Date(dateVal).toLocaleDateString("en-US", { month: "short", year: "numeric" });
-  } catch {
-    return String(dateVal || "").slice(0, 7);
-  }
+function formatDate(dateVal: string): string {
+  const d = toLocalDate(dateVal);
+  if (!d) return "";
+  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
 export default function CertificationsPage() {

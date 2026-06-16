@@ -79,12 +79,15 @@ export default function AdminMessages() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ read: true }),
       });
-      if (!res.ok) throw new Error("Failed to update");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       setMessages((prev) =>
         prev.map((m) => (m.id === id ? { ...m, read: true } : m))
       );
-    } catch {
-      toast.error("Failed to mark as read");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to mark as read");
     }
   };
 
@@ -96,13 +99,16 @@ export default function AdminMessages() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ read: !currentRead }),
       });
-      if (!res.ok) throw new Error("Failed to update");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       setMessages((prev) =>
         prev.map((m) => (m.id === id ? { ...m, read: !currentRead } : m))
       );
       toast.success(currentRead ? "Marked as unread" : "Marked as read");
-    } catch {
-      toast.error("Failed to update message");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update message");
     }
   };
 
@@ -111,11 +117,14 @@ export default function AdminMessages() {
     setDeletingId(id);
     try {
       const res = await fetch(`/api/contact/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success("Message deleted");
       setMessages((prev) => prev.filter((m) => m.id !== id));
-    } catch {
-      toast.error("Failed to delete message");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete message");
     } finally {
       setDeletingId(null);
     }

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { normalizeUrl } from "@/lib/utils";
 
 interface SettingsData {
   email?: string;
@@ -51,20 +52,23 @@ export default function ContactPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error("Failed to send");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success("Message sent successfully! I'll get back to you soon.");
       setForm({ name: "", email: "", subject: "", message: "" });
-    } catch {
-      toast.error("Something went wrong. Please try again later.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Something went wrong. Please try again later.");
     } finally {
       setSubmitting(false);
     }
   }
 
   const socialLinks: SocialLink[] = [
-    { href: settings?.githubUrl || "", icon: FolderGit2, label: "GitHub" },
-    { href: settings?.linkedinUrl || "", icon: UserRound, label: "LinkedIn" },
-    { href: settings?.twitterUrl || "", icon: Globe, label: "Twitter" },
+    { href: normalizeUrl(settings?.githubUrl), icon: FolderGit2, label: "GitHub" },
+    { href: normalizeUrl(settings?.linkedinUrl), icon: UserRound, label: "LinkedIn" },
+    { href: normalizeUrl(settings?.twitterUrl), icon: Globe, label: "Twitter" },
   ].filter((l) => l.href);
 
   return (
@@ -155,9 +159,9 @@ export default function ContactPage() {
                 </Reveal>
               )}
 
-              {settings?.resumeUrl && (
+              {normalizeUrl(settings?.resumeUrl) && (
                 <Reveal direction="right" delay={0.2}>
-                  <a href={settings.resumeUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={normalizeUrl(settings?.resumeUrl)} target="_blank" rel="noopener noreferrer">
                     <Button variant="outline" className="w-full gap-2">
                       <Download size={16} /> Download Resume
                     </Button>

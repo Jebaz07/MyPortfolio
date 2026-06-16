@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { toLocalDate, toDateInputValue } from "@/lib/date-utils";
 import {
   Plus,
   Edit2,
@@ -104,8 +105,8 @@ export default function AdminExperience() {
       company: exp.company,
       role: exp.role,
       description: exp.description || "",
-      startDate: exp.startDate ? format(new Date(exp.startDate), "yyyy-MM-dd") : "",
-      endDate: exp.endDate ? format(new Date(exp.endDate), "yyyy-MM-dd") : "",
+      startDate: toDateInputValue(exp.startDate),
+      endDate: toDateInputValue(exp.endDate),
       current: exp.current,
       type: exp.type,
       location: exp.location || "",
@@ -135,12 +136,15 @@ export default function AdminExperience() {
           body: JSON.stringify(body),
         }
       );
-      if (!res.ok) throw new Error("Failed to save");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success(editingId ? "Experience updated" : "Experience created");
       setDialogOpen(false);
       loadExperiences();
-    } catch {
-      toast.error("Failed to save experience");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save experience");
     } finally {
       setSaving(false);
     }
@@ -149,11 +153,14 @@ export default function AdminExperience() {
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/experience/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success("Experience deleted");
       loadExperiences();
-    } catch {
-      toast.error("Failed to delete experience");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete experience");
     }
   };
 
@@ -207,8 +214,8 @@ export default function AdminExperience() {
                       </div>
                       <div className="flex items-center gap-2 mt-1 text-sm text-zinc-500">
                         <span>
-                          {format(new Date(exp.startDate), "MMM yyyy")} -{" "}
-                          {exp.current ? "Present" : exp.endDate ? format(new Date(exp.endDate), "MMM yyyy") : ""}
+                          {format(toLocalDate(exp.startDate) ?? new Date(), "MMM yyyy")} -{" "}
+                          {exp.current ? "Present" : exp.endDate ? format(toLocalDate(exp.endDate) ?? new Date(), "MMM yyyy") : ""}
                         </span>
                         {exp.location && (
                           <>

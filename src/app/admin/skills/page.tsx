@@ -99,12 +99,15 @@ export default function AdminSkills() {
           body: JSON.stringify({ name: catName }),
         }
       );
-      if (!res.ok) throw new Error("Failed to save");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success(editingCatId ? "Category updated" : "Category created");
       setCatDialogOpen(false);
       loadCategories();
-    } catch {
-      toast.error("Failed to save category");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save category");
     } finally {
       setSaving(false);
     }
@@ -113,11 +116,14 @@ export default function AdminSkills() {
   const deleteCategory = async (id: string) => {
     try {
       const res = await fetch(`/api/skills/categories/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success("Category deleted");
       loadCategories();
-    } catch {
-      toast.error("Failed to delete category");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete category");
     }
   };
 
@@ -151,12 +157,15 @@ export default function AdminSkills() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...skillForm, categoryId: activeCategoryId }),
       });
-      if (!res.ok) throw new Error("Failed to save");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success(editingSkillId ? "Skill updated" : "Skill created");
       setSkillDialogOpen(false);
       loadCategories();
-    } catch {
-      toast.error("Failed to save skill");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save skill");
     } finally {
       setSaving(false);
     }
@@ -165,11 +174,14 @@ export default function AdminSkills() {
   const deleteSkill = async (id: string) => {
     try {
       const res = await fetch(`/api/skills/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success("Skill deleted");
       loadCategories();
-    } catch {
-      toast.error("Failed to delete skill");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete skill");
     }
   };
 
@@ -192,11 +204,14 @@ export default function AdminSkills() {
           ids: newSkills.map((s) => s.id),
         }),
       });
-      if (!res.ok) throw new Error("Failed to reorder");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success("Reordered");
       loadCategories();
-    } catch {
-      toast.error("Failed to reorder");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reorder");
     }
   };
 

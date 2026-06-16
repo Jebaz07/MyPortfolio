@@ -23,16 +23,16 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-gold transition-colors">
+            <a href="https://github.com/jebazwesley" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-gold transition-colors">
               <FolderGit2 size={20} />
             </a>
-            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-gold transition-colors">
+            <a href="https://linkedin.com/in/jebazwesley" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-gold transition-colors">
               <UserRound size={20} />
             </a>
             <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-zinc-400 hover:text-gold transition-colors">
               <Globe size={20} />
             </a>
-            <a href="mailto:hello@jebaz.com" className="text-zinc-400 hover:text-gold transition-colors">
+            <a href="mailto:jebazwesleyraj@gmail.com" className="text-zinc-400 hover:text-gold transition-colors">
               <Mail size={20} />
             </a>
           </div>

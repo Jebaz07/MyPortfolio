@@ -15,6 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { toLocalDate, toDateInputValue } from "@/lib/date-utils";
 import {
   Plus,
   Edit2,
@@ -103,8 +104,8 @@ export default function AdminCertifications() {
       imageUrl: cert.imageUrl || "",
       pdfUrl: cert.pdfUrl || "",
       verificationUrl: cert.verificationUrl || "",
-      issueDate: cert.issueDate ? format(new Date(cert.issueDate), "yyyy-MM-dd") : "",
-      expiryDate: cert.expiryDate ? format(new Date(cert.expiryDate), "yyyy-MM-dd") : "",
+      issueDate: toDateInputValue(cert.issueDate),
+      expiryDate: toDateInputValue(cert.expiryDate),
       order: cert.order,
     });
     setDialogOpen(true);
@@ -131,12 +132,15 @@ export default function AdminCertifications() {
           body: JSON.stringify(body),
         }
       );
-      if (!res.ok) throw new Error("Failed to save");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success(editingId ? "Certification updated" : "Certification created");
       setDialogOpen(false);
       loadCertifications();
-    } catch {
-      toast.error("Failed to save certification");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save certification");
     } finally {
       setSaving(false);
     }
@@ -145,11 +149,14 @@ export default function AdminCertifications() {
   const handleDelete = async (id: string) => {
     try {
       const res = await fetch(`/api/certifications/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success("Certification deleted");
       loadCertifications();
-    } catch {
-      toast.error("Failed to delete certification");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete certification");
     }
   };
 
@@ -209,12 +216,12 @@ export default function AdminCertifications() {
                   <div className="flex flex-wrap gap-2 mt-3">
                     {cert.issueDate && (
                       <span className="text-xs text-zinc-500">
-                        Issued: {format(new Date(cert.issueDate), "MMM yyyy")}
+                        Issued: {format(toLocalDate(cert.issueDate) ?? new Date(), "MMM yyyy")}
                       </span>
                     )}
                     {cert.expiryDate && (
                       <span className="text-xs text-zinc-500">
-                        Expires: {format(new Date(cert.expiryDate), "MMM yyyy")}
+                        Expires: {format(toLocalDate(cert.expiryDate) ?? new Date(), "MMM yyyy")}
                       </span>
                     )}
                   </div>

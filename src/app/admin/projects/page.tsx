@@ -143,13 +143,16 @@ export default function AdminProjects() {
         }
       );
 
-      if (!res.ok) throw new Error("Failed to save");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
 
       toast.success(editingId ? "Project updated" : "Project created");
       setDialogOpen(false);
       loadProjects();
-    } catch {
-      toast.error("Failed to save project");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save project");
     } finally {
       setSaving(false);
     }
@@ -159,11 +162,14 @@ export default function AdminProjects() {
     setDeletingId(id);
     try {
       const res = await fetch(`/api/projects/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success("Project deleted");
       loadProjects();
-    } catch {
-      toast.error("Failed to delete project");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete project");
     } finally {
       setDeletingId(null);
     }
@@ -176,11 +182,14 @@ export default function AdminProjects() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ featured: !project.featured }),
       });
-      if (!res.ok) throw new Error("Failed to update");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
       toast.success(project.featured ? "Removed from featured" : "Marked as featured");
       loadProjects();
-    } catch {
-      toast.error("Failed to update project");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to update project");
     }
   };
 

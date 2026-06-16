@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Calendar, MapPin, Briefcase, Award } from "lucide-react";
 import Reveal from "@/components/sections/reveal";
 import { Card } from "@/components/ui/card";
+import { toLocalDate } from "@/lib/date-utils";
 
 interface ExperienceItem {
   id: string;
@@ -18,13 +19,10 @@ interface ExperienceItem {
   location?: string;
 }
 
-function formatDate(dateVal: string | Date): string {
-  try {
-    const d = new Date(dateVal);
-    return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-  } catch {
-    return String(dateVal || "").slice(0, 7);
-  }
+function formatDate(dateVal: string): string {
+  const d = toLocalDate(dateVal);
+  if (!d) return "";
+  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 }
 
 function TimelineSection({

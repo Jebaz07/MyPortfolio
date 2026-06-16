@@ -27,9 +27,26 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { id } = await params;
     const body = await request.json();
     const { prisma } = await import("@/lib/prisma");
-    const project = await prisma.project.update({ where: { id }, data: body, include: { images: { orderBy: { order: "asc" } } } });
+    const data = {
+      title: body.title,
+      slug: body.slug,
+      description: body.description,
+      content: body.content ?? null,
+      challenges: body.challenges ?? null,
+      technologies: Array.isArray(body.technologies) ? body.technologies : [],
+      githubUrl: body.githubUrl ?? null,
+      demoUrl: body.demoUrl ?? null,
+      featured: body.featured ?? false,
+      order: body.order ?? 0,
+    };
+    const project = await prisma.project.update({
+      where: { id },
+      data,
+      include: { images: { orderBy: { order: "asc" } } },
+    });
     return NextResponse.json(project);
-  } catch {
+  } catch (error) {
+    console.error("Error updating project:", error);
     return NextResponse.json({ error: "Update failed" }, { status: 500 });
   }
 }
